@@ -1,0 +1,40 @@
+# 1. The Deployment (The Pods)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+spec:
+  replicas: 2 # Let's run 2 copies of your product service for high availability!
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+        - name: product-service
+          # This must match the image name Docker Compose just built
+          image: ecom-platform-product-service:latest
+          # CRITICAL: Tells local K8s to use your local Docker images, not the internet
+          imagePullPolicy: Never 
+          ports:
+            - containerPort: 5002
+          envFrom:
+            - secretRef:
+                name: ecom-secrets # Pulls all variables from your secrets.yaml
+
+---
+# 2. The Internal Network (The Service)
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service # The API Gateway will use this exact name to route traffic
+spec:
+  type: ClusterIP
+  selector:
+    app: product-service
+  ports:
+    - port: 5002
+      targetPort: 5002

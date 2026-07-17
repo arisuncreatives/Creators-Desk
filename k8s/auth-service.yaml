@@ -1,0 +1,38 @@
+# 1. The Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 2 
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: ecom-platform-auth-service:latest
+          imagePullPolicy: Never # Forces K8s to use your local build
+          ports:
+            - containerPort: 5001
+          envFrom:
+            - secretRef:
+                name: ecom-secrets
+
+---
+# 2. The Internal Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service 
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-service
+  ports:
+    - port: 5001
+      targetPort: 5001

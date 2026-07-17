@@ -1,0 +1,35 @@
+# 1. The Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ecom-platform-frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+
+---
+# 2. The External Network (LoadBalancer)
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+    - port: 3000
+      targetPort: 80 # Maps the public port 3000 to Nginx's internal port 80

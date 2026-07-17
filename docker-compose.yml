@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # --- 1. THE FRONTEND ---
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80" # Maps your computer's port 3000 to Nginx's port 80
+    depends_on:
+      - api-gateway
+
+  # --- 2. THE API GATEWAY ---
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "5000:5000" # Exposes the gateway to your local machine
+    env_file:
+      - ./api-gateway/.env # Injects your secrets back into the container
+    depends_on:
+      - auth-service
+      - product-service
+      - cart-service
+      - order-service
+
+  # --- 3. THE INTERNAL MICROSERVICES ---
+  # Notice there are NO 'ports' mapped here! 
+  # They are completely shielded from the outside internet.
+  auth-service:
+    build: ./auth-service
+    env_file:
+      - ./auth-service/.env
+
+  product-service:
+    build: ./product-service
+    env_file:
+      - ./product-service/.env
+
+  cart-service:
+    build: ./cart-service
+    env_file:
+      - ./cart-service/.env
+
+  order-service:
+    build: ./order-service
+    env_file:
+      - ./order-service/.env
