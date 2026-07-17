@@ -7,7 +7,6 @@ dotenv.config();
 const app = express();
 
 // Global Middleware
-// STRICT CORS: Only allowing local testing and the live Vercel frontend
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -17,13 +16,19 @@ app.use(cors({
   credentials: true 
 }));
 
+// --- THE FIX: The Path Restorer ---
+// Express strips the mounted path (e.g., changing /api/products to just /).
+// This restores the full original path so the microservices get exactly what they expect.
+const restorePath = (req, res, next) => {
+  req.url = req.originalUrl;
+  next();
+};
+
 // --- Universal Proxy Configuration ---
-// This disables strict SSL checks and prevents path stripping/double-rewriting.
 const createProxyOptions = (targetUrl, serviceName) => ({
   target: targetUrl,
   changeOrigin: true,
-  secure: false, // CRITICAL: Fixes the 502 Bad Gateway between Render services
-  // Notice there is NO pathRewrite here!
+  secure: false, // Fixes Render internal network SSL blocks
   onProxyReq: (proxyReq, req, res) => {
     console.log(`[Gateway] Routing to ${serviceName}: ${req.method} ${req.originalUrl}`);
   },
@@ -36,17 +41,17 @@ const createProxyOptions = (targetUrl, serviceName) => ({
 // --- Microservice Routing ---
 
 // 1. Auth Service Route
-app.use('/api/auth', createProxyMiddleware(
+app.use('/api/auth', restorePath, createProxyMiddleware(
   createProxyOptions(process.env.AUTH_SERVICE_URL || 'https://creator-s-desk-auth-service.onrender.com', 'Auth')
 ));
 
 // 2. Product Service Route
-app.use('/api/products', createProxyMiddleware(
+app.use('/api/products', restorePath, createProxyMiddleware(
   createProxyOptions(process.env.PRODUCT_SERVICE_URL || 'https://creator-s-desk-product-service.onrender.com', 'Products')
 ));
 
 // 3. Order Service Route 
-app.use('/api/orders', createProxyMiddleware(
+app.use('/api/orders', restorePath, createProxyMiddleware(
   createProxyOptions(process.env.ORDER_SERVICE_URL || 'https://creator-s-desk-order-service.onrender.com', 'Orders')
 ));
 
@@ -57,7 +62,6 @@ app.get('/health', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// CRITICAL: Must listen on 0.0.0.0 for Render to successfully connect to this container
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔀 API Gateway running on port ${PORT}`);
 });
