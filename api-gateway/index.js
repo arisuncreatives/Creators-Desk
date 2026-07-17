@@ -17,12 +17,17 @@ app.use(cors({
 }));
 
 // --- Universal Proxy Configuration ---
-const createProxyOptions = (targetUrl, serviceName) => ({
+// Added pathPrefix and pathRewrite to physically strip the URL
+const createProxyOptions = (targetUrl, pathPrefix, serviceName) => ({
   target: targetUrl,
   changeOrigin: true,
-  secure: false, // Fixes Render internal network SSL blocks
+  secure: false, 
+  pathRewrite: {
+    [`^${pathPrefix}`]: '', // CRITICAL: This changes /api/auth/send-code to just /send-code
+  },
   onProxyReq: (proxyReq, req, res) => {
-    console.log(`[Gateway] Routing to ${serviceName}: ${req.method} ${req.originalUrl}`);
+    // This log will now show exactly what is being forwarded
+    console.log(`[Gateway] Routing to ${serviceName}: ${req.method} ${req.originalUrl} -> ${proxyReq.path}`);
   },
   onError: (err, req, res) => {
     console.error(`[Gateway] Error routing to ${serviceName}:`, err.message);
@@ -31,22 +36,20 @@ const createProxyOptions = (targetUrl, serviceName) => ({
 });
 
 // --- Microservice Routing ---
-// All environment variable fallbacks have been removed. 
-// Traffic is routed directly to the hardcoded service URLs.
 
-// 1. Auth Service Route
+// 1. Auth Service Route (Strips /api/auth)
 app.use('/api/auth', createProxyMiddleware(
-  createProxyOptions('https://creator-s-desk-auth-service.onrender.com', 'Auth')
+  createProxyOptions('https://creator-s-desk-auth-service.onrender.com', '/api/auth', 'Auth')
 ));
 
-// 2. Product Service Route
+// 2. Product Service Route (Strips /api/products)
 app.use('/api/products', createProxyMiddleware(
-  createProxyOptions('https://creator-s-desk-product-service.onrender.com', 'Products')
+  createProxyOptions('https://creator-s-desk-product-service.onrender.com', '/api/products', 'Products')
 ));
 
-// 3. Order Service Route 
+// 3. Order Service Route (Strips /api/orders)
 app.use('/api/orders', createProxyMiddleware(
-  createProxyOptions('https://creator-s-desk-order-service.onrender.com', 'Orders')
+  createProxyOptions('https://creator-s-desk-order-service.onrender.com', '/api/orders', 'Orders')
 ));
 
 // Health Check for the Gateway itself
