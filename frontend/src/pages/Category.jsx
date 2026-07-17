@@ -18,7 +18,7 @@ const Category = () => {
       setIsLoading(true);
       try {
         // Fetch products filtered by the category query parameter
-        const response = await fetch(`http://localhost:5000/api/products?category=${encodeURIComponent(formattedCategory)}`);
+        const response = await fetch(`https://creator-s-desk-api-gateway.onrender.com/api/products?category=${encodeURIComponent(formattedCategory)}`);
         
         if (response.ok) {
           const data = await response.json();

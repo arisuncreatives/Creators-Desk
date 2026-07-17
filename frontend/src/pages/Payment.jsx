@@ -43,7 +43,7 @@ const Payment = () => {
         return;
       }
       try {
-        const response = await fetch('http://localhost:5000/api/orders/me', {
+        const response = await fetch('https://creator-s-desk-api-gateway.onrender.com/api/orders/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -81,7 +81,7 @@ const Payment = () => {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch('https://creator-s-desk-api-gateway.onrender.com/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

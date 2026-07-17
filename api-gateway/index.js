@@ -7,14 +7,22 @@ dotenv.config();
 const app = express();
 
 // Global Middleware
-app.use(cors());
+// STRICT CORS: Only allowing local testing and the live Vercel frontend
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://creator-s-desk.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true 
+}));
 
 // --- Microservice Routing ---
 
 // 1. Auth Service Route
 app.use('/api/auth', createProxyMiddleware({
   // UPDATED: Now points to the Docker container name instead of localhost
-  target: process.env.AUTH_SERVICE_URL || 'http://auth-service:5001',
+  target: process.env.AUTH_SERVICE_URL || 'https://creator-s-desk-auth-service.onrender.com',
   changeOrigin: true,
   pathRewrite: {
     '^/': '/api/auth/' 
@@ -27,7 +35,7 @@ app.use('/api/auth', createProxyMiddleware({
 // 2. Product Service Route
 app.use('/api/products', createProxyMiddleware({
   // UPDATED: Now points to the Docker container name instead of localhost
-  target: process.env.PRODUCT_SERVICE_URL || 'http://product-service:5002',
+  target: process.env.PRODUCT_SERVICE_URL || 'https://creator-s-desk-product-service.onrender.com',
   changeOrigin: true,
   pathRewrite: {
     '^/': '/api/products/' 
@@ -40,7 +48,7 @@ app.use('/api/products', createProxyMiddleware({
 // 3. Order Service Route 
 app.use('/api/orders', createProxyMiddleware({
   // UPDATED: Now points to the Docker container name instead of localhost
-  target: process.env.ORDER_SERVICE_URL || 'http://order-service:5003',
+  target: process.env.ORDER_SERVICE_URL || 'https://creator-s-desk-order-service.onrender.com',
   changeOrigin: true,
   pathRewrite: {
     '^/': '/api/orders/' 
