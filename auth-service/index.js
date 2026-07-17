@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import twilio from 'twilio';
 import jwt from 'jsonwebtoken';
 import User from './models/user.js'; 
-import { requireAuth } from './middleware/authMiddleware.js'; // <--- Moved to the top!
+import { requireAuth } from './middleware/authMiddleware.js'; 
 
 dotenv.config();
 const app = express();
@@ -136,4 +136,5 @@ app.put('/api/auth/me', requireAuth, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`🔐 Auth Service running on port ${PORT}`));
+// CRITICAL FIX: Ensure the service listens on 0.0.0.0 so Render's internal network can route to it
+app.listen(PORT, '0.0.0.0', () => console.log(`🔐 Auth Service running on port ${PORT}`));

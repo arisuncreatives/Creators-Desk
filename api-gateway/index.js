@@ -17,46 +17,38 @@ app.use(cors({
   credentials: true 
 }));
 
+// --- Universal Proxy Configuration ---
+// This disables strict SSL checks and prevents path stripping/double-rewriting.
+const createProxyOptions = (targetUrl, serviceName) => ({
+  target: targetUrl,
+  changeOrigin: true,
+  secure: false, // CRITICAL: Fixes the 502 Bad Gateway between Render services
+  // Notice there is NO pathRewrite here!
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`[Gateway] Routing to ${serviceName}: ${req.method} ${req.originalUrl}`);
+  },
+  onError: (err, req, res) => {
+    console.error(`[Gateway] Error routing to ${serviceName}:`, err.message);
+    res.status(502).json({ error: `Failed to connect to ${serviceName} Service.` });
+  }
+});
+
 // --- Microservice Routing ---
 
 // 1. Auth Service Route
-app.use('/api/auth', createProxyMiddleware({
-  // UPDATED: Now points to the Docker container name instead of localhost
-  target: process.env.AUTH_SERVICE_URL || 'https://creator-s-desk-auth-service.onrender.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/': '/api/auth/' 
-  },
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`[Gateway] Routing to Auth: ${req.method} ${req.originalUrl}`);
-  }
-}));
+app.use('/api/auth', createProxyMiddleware(
+  createProxyOptions(process.env.AUTH_SERVICE_URL || 'https://creator-s-desk-auth-service.onrender.com', 'Auth')
+));
 
 // 2. Product Service Route
-app.use('/api/products', createProxyMiddleware({
-  // UPDATED: Now points to the Docker container name instead of localhost
-  target: process.env.PRODUCT_SERVICE_URL || 'https://creator-s-desk-product-service.onrender.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/': '/api/products/' 
-  },
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`[Gateway] Routing to Products: ${req.method} ${req.originalUrl}`);
-  }
-}));
+app.use('/api/products', createProxyMiddleware(
+  createProxyOptions(process.env.PRODUCT_SERVICE_URL || 'https://creator-s-desk-product-service.onrender.com', 'Products')
+));
 
 // 3. Order Service Route 
-app.use('/api/orders', createProxyMiddleware({
-  // UPDATED: Now points to the Docker container name instead of localhost
-  target: process.env.ORDER_SERVICE_URL || 'https://creator-s-desk-order-service.onrender.com',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/': '/api/orders/' 
-  },
-  onProxyReq: (proxyReq, req, res) => {
-    console.log(`[Gateway] Routing to Orders: ${req.method} ${req.originalUrl}`);
-  }
-}));
+app.use('/api/orders', createProxyMiddleware(
+  createProxyOptions(process.env.ORDER_SERVICE_URL || 'https://creator-s-desk-order-service.onrender.com', 'Orders')
+));
 
 // Health Check for the Gateway itself
 app.get('/health', (req, res) => {
@@ -64,6 +56,8 @@ app.get('/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+
+// CRITICAL: Must listen on 0.0.0.0 for Render to successfully connect to this container
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔀 API Gateway running on port ${PORT}`);
 });

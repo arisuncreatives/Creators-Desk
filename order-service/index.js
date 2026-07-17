@@ -10,9 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 5003; // Running on 5003!
+const PORT = process.env.PORT || 5003; 
 
-mongoose.connect(process.env.MONGO_URI_ORDERS)
+// Database Connection with a local fallback for testing
+mongoose.connect(process.env.MONGO_URI_ORDERS || 'mongodb://localhost:27017/creatorsdesk_orders')
   .then(() => console.log('✅ Order Service DB Connected'))
   .catch((err) => console.error('❌ Order DB Connection Error:', err));
 
@@ -51,6 +52,7 @@ app.get('/api/orders/me', requireAuth, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+// CRITICAL FIX: Ensure the service listens on 0.0.0.0 so Render's internal network can route to it
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🛒 Order Service running on port ${PORT}`);
 });

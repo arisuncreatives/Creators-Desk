@@ -11,8 +11,8 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5002; 
 
-// Database Connection
-mongoose.connect(process.env.MONGO_URI_PRODUCTS)
+// Database Connection with a local fallback for testing
+mongoose.connect(process.env.MONGO_URI_PRODUCTS || 'mongodb://localhost:27017/creatorsdesk_products')
   .then(() => console.log('✅ Product Service DB Connected'))
   .catch((err) => console.error('❌ Product DB Connection Error:', err));
 
@@ -48,6 +48,7 @@ app.get('/api/products/:slug', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+// CRITICAL FIX: Ensure the service listens on 0.0.0.0 so Render's internal network can route to it
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`📦 Product Service running on port ${PORT}`);
 });
