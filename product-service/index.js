@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import Product from './models/Product.js'; // <-- Crucial: Needs the blueprint
+import Product from './models/Product.js'; 
 
 dotenv.config();
 const app = express();
@@ -11,15 +11,14 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5002; 
 
-// Database Connection with a local fallback for testing
 mongoose.connect(process.env.MONGO_URI_PRODUCTS || 'mongodb://localhost:27017/creatorsdesk_products')
   .then(() => console.log('✅ Product Service DB Connected'))
   .catch((err) => console.error('❌ Product DB Connection Error:', err));
 
-// --- THE MISSING ROUTES ---
+// --- CORRECTED ROUTES (Prefixes Dropped) ---
 
-// 1. Get ALL Products (with optional category filter)
-app.get('/api/products', async (req, res) => {
+// 1. Get ALL Products
+app.get('/', async (req, res) => {
   try {
     const { category } = req.query;
     const filter = category ? { category } : {};
@@ -33,7 +32,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 // 2. Get a SINGLE Product by Slug
-app.get('/api/products/:slug', async (req, res) => {
+app.get('/:slug', async (req, res) => {
   try {
     const product = await Product.findOne({ slug: req.params.slug });
     
@@ -48,7 +47,6 @@ app.get('/api/products/:slug', async (req, res) => {
   }
 });
 
-// CRITICAL FIX: Ensure the service listens on 0.0.0.0 so Render's internal network can route to it
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`📦 Product Service running on port ${PORT}`);
 });

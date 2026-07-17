@@ -12,15 +12,14 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5003; 
 
-// Database Connection with a local fallback for testing
 mongoose.connect(process.env.MONGO_URI_ORDERS || 'mongodb://localhost:27017/creatorsdesk_orders')
   .then(() => console.log('✅ Order Service DB Connected'))
   .catch((err) => console.error('❌ Order DB Connection Error:', err));
 
-// --- Routes ---
+// --- CORRECTED ROUTES (Prefixes Dropped) ---
 
 // 1. Create a New Order (Checkout)
-app.post('/api/orders', requireAuth, async (req, res) => {
+app.post('/', requireAuth, async (req, res) => {
   try {
     const { items, totalAmount, shippingAddress } = req.body;
 
@@ -29,7 +28,7 @@ app.post('/api/orders', requireAuth, async (req, res) => {
     }
 
     const newOrder = await Order.create({
-      userId: req.user.userId, // Pulled securely from the JWT token
+      userId: req.user.userId, 
       items,
       totalAmount,
       shippingAddress
@@ -43,7 +42,7 @@ app.post('/api/orders', requireAuth, async (req, res) => {
 });
 
 // 2. Get logged-in user's order history
-app.get('/api/orders/me', requireAuth, async (req, res) => {
+app.get('/me', requireAuth, async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.userId }).sort({ createdAt: -1 });
     res.status(200).json(orders);
@@ -52,7 +51,6 @@ app.get('/api/orders/me', requireAuth, async (req, res) => {
   }
 });
 
-// CRITICAL FIX: Ensure the service listens on 0.0.0.0 so Render's internal network can route to it
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🛒 Order Service running on port ${PORT}`);
 });
