@@ -31,21 +31,22 @@ const createProxyOptions = (targetUrl, serviceName) => ({
 });
 
 // --- Microservice Routing ---
-// Note: restorePath has been removed. The proxy handles the paths naturally.
+// All environment variable fallbacks have been removed. 
+// Traffic is routed directly to the hardcoded service URLs.
 
 // 1. Auth Service Route
 app.use('/api/auth', createProxyMiddleware(
-  createProxyOptions(process.env.AUTH_SERVICE_URL || 'https://creator-s-desk-auth-service.onrender.com', 'Auth')
+  createProxyOptions('https://creator-s-desk-auth-service.onrender.com', 'Auth')
 ));
 
 // 2. Product Service Route
 app.use('/api/products', createProxyMiddleware(
-  createProxyOptions(process.env.PRODUCT_SERVICE_URL || 'https://creator-s-desk-product-service.onrender.com', 'Products')
+  createProxyOptions('https://creator-s-desk-product-service.onrender.com', 'Products')
 ));
 
 // 3. Order Service Route 
 app.use('/api/orders', createProxyMiddleware(
-  createProxyOptions(process.env.ORDER_SERVICE_URL || 'https://creator-s-desk-order-service.onrender.com', 'Orders')
+  createProxyOptions('https://creator-s-desk-order-service.onrender.com', 'Orders')
 ));
 
 // Health Check for the Gateway itself
