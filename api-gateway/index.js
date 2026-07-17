@@ -16,14 +16,6 @@ app.use(cors({
   credentials: true 
 }));
 
-// --- THE FIX: The Path Restorer ---
-// Express strips the mounted path (e.g., changing /api/products to just /).
-// This restores the full original path so the microservices get exactly what they expect.
-const restorePath = (req, res, next) => {
-  req.url = req.originalUrl;
-  next();
-};
-
 // --- Universal Proxy Configuration ---
 const createProxyOptions = (targetUrl, serviceName) => ({
   target: targetUrl,
@@ -39,19 +31,20 @@ const createProxyOptions = (targetUrl, serviceName) => ({
 });
 
 // --- Microservice Routing ---
+// Note: restorePath has been removed. The proxy handles the paths naturally.
 
 // 1. Auth Service Route
-app.use('/api/auth', restorePath, createProxyMiddleware(
+app.use('/api/auth', createProxyMiddleware(
   createProxyOptions(process.env.AUTH_SERVICE_URL || 'https://creator-s-desk-auth-service.onrender.com', 'Auth')
 ));
 
 // 2. Product Service Route
-app.use('/api/products', restorePath, createProxyMiddleware(
+app.use('/api/products', createProxyMiddleware(
   createProxyOptions(process.env.PRODUCT_SERVICE_URL || 'https://creator-s-desk-product-service.onrender.com', 'Products')
 ));
 
 // 3. Order Service Route 
-app.use('/api/orders', restorePath, createProxyMiddleware(
+app.use('/api/orders', createProxyMiddleware(
   createProxyOptions(process.env.ORDER_SERVICE_URL || 'https://creator-s-desk-order-service.onrender.com', 'Orders')
 ));
 
