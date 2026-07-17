@@ -25,13 +25,15 @@ const createProxyOptions = (targetUrl, pathPrefix, serviceName) => ({
   pathRewrite: {
     [`^${pathPrefix}`]: '', // CRITICAL: This changes /api/auth/send-code to just /send-code
   },
-  onProxyReq: (proxyReq, req, res) => {
-    // This log will now show exactly what is being forwarded
-    console.log(`[Gateway] Routing to ${serviceName}: ${req.method} ${req.originalUrl} -> ${proxyReq.path}`);
-  },
-  onError: (err, req, res) => {
-    console.error(`[Gateway] Error routing to ${serviceName}:`, err.message);
-    res.status(502).json({ error: `Failed to connect to ${serviceName} Service.` });
+  on: {
+    proxyReq: (proxyReq, req, res) => {
+      // This log will now show exactly what is being forwarded
+      console.log(`[Gateway] Routing to ${serviceName}: ${req.method} ${req.originalUrl} -> ${proxyReq.path}`);
+    },
+    error: (err, req, res) => {
+      console.error(`[Gateway] Error routing to ${serviceName}:`, err.message);
+      res.status(502).json({ error: `Failed to connect to ${serviceName} Service.` });
+    }
   }
 });
 
