@@ -28,6 +28,8 @@ mongoose.connect(process.env.MONGO_URI_AUTH || 'mongodb://localhost:27017/creato
 
 const otpStore = new Map();
 
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
 // --- Routes ---
 
 // 1. Generate & Send OTP (Prefix dropped)

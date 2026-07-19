@@ -18,6 +18,8 @@ mongoose.connect(process.env.MONGO_URI_ORDERS || 'mongodb://localhost:27017/crea
 
 // --- CORRECTED ROUTES (Prefixes Dropped) ---
 
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
 // 1. Create a New Order (Checkout)
 app.post('/', requireAuth, async (req, res) => {
   try {

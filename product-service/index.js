@@ -17,6 +17,8 @@ mongoose.connect(process.env.MONGO_URI_PRODUCTS || 'mongodb://localhost:27017/cr
 
 // --- CORRECTED ROUTES (Prefixes Dropped) ---
 
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
 // 1. Get ALL Products
 app.get('/', async (req, res) => {
   try {

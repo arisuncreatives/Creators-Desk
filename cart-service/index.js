@@ -1,16 +1,19 @@
-import http from 'http';
+import express from 'express';
 
+const app = express();
 const PORT = process.env.PORT || 5004;
 
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: 'Cart service is under construction.' }));
+// The health route for cron-job.org
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// The main cart route
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'Cart service is under construction.' });
 });
 
 // CRITICAL FIX: Bound to 0.0.0.0 for Render internal routing
-server.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🛒 Cart Service running on port ${PORT}`);
 });
-
-
-
