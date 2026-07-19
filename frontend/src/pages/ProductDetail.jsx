@@ -25,12 +25,12 @@ const ProductDetail = () => {
     const fetchProductData = async () => {
       setIsLoading(true);
       try {
-        const productRes = await fetch(`https://creator-s-desk-api-gateway.onrender.com/api/products/${slug}`);
+        const productRes = await fetch(`https://creators-desk-gateway.onrender.com/api/products/${slug}`);
         if (!productRes.ok) throw new Error("Product not found");
         const foundProduct = await productRes.json();
         setProduct({ ...foundProduct, id: foundProduct.slug }); 
 
-        const relatedRes = await fetch(`https://creator-s-desk-api-gateway.onrender.com/api/products?category=${encodeURIComponent(foundProduct.category)}`);
+        const relatedRes = await fetch(`https://creators-desk-gateway.onrender.com/api/products?category=${encodeURIComponent(foundProduct.category)}`);
         if (relatedRes.ok) {
           const relatedData = await relatedRes.json();
           const filteredRelated = relatedData

@@ -16,7 +16,7 @@ const Search = () => {
       setIsLoading(true);
       try {
         // Fetch all products
-        const response = await fetch('https://creator-s-desk-api-gateway.onrender.com/api/products');
+        const response = await fetch('https://creators-desk-gateway.onrender.com/api/products');
         
         if (response.ok) {
           const allProducts = await response.json();

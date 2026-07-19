@@ -22,7 +22,7 @@ const Login = () => {
       : `+91${phone.replace(/\D/g, "")}`;
 
     try {
-      const response = await fetch("https://creator-s-desk-api-gateway.onrender.com/api/auth/send-code", {
+      const response = await fetch("https://creators-desk-gateway.onrender.com/api/auth/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // 2. Send the cleaned, formatted number
@@ -52,7 +52,7 @@ const Login = () => {
 
     try {
       const response = await fetch(
-        "https://creator-s-desk-api-gateway.onrender.com/api/auth/verify-code",
+        "https://creators-desk-gateway.onrender.com/api/auth/verify-code",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
